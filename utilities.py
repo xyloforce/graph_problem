@@ -13,9 +13,9 @@ def dict_to_mzn_array(neighbourhood_dict):
         final_table +="| " # start of line in mzn array
         for j in neighbourhood_dict:
             if j in neighbourhood_dict[i]:
-                final_table += "TRUE, "
+                final_table += "true, "
             else:
-                final_table += "FALSE, "
+                final_table += "false, "
         final_table = final_table[:-2]
         final_table += " "
     final_table += "|"
