@@ -20,14 +20,25 @@ def dict_to_mzn_array(neighbourhood_dict):
     final_table += "];"
     return final_table
 
+def dict_keys_to_mzn_enum(neighbourhood_dict):
+    enum="{"
+    for i in neighbourhood_dict:
+        enum += i + ","
+    enum = enum[:-1]
+    enum += "};"
+    return enum
+
 species = dict() # entry data
 species["S1"]="P1", "Z2", "C3", "F4"
 species["S2"]="C1", "A2", "V3", "F4"
 species["S3"]="A1", "A2", "M3", "F4"
 species["S4"]="A1", "C2", "M3", "A4"
 
-final_table=dict_to_mzn_array(create_neighborhoods(species))
+neighbourhood = create_neighborhoods(species)
+final_table=dict_to_mzn_array(neighbourhood)
+enum = dict_keys_to_mzn_enum(neighbourhood)
 
 result=open("table_mzn.txt", "w")
-result.write(final_table);
+result.write(final_table + "\n");
+result.write(enum)
 result.close()
