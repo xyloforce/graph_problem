@@ -14,16 +14,19 @@ with open('raw','r') as file:
 	sequence = ""
 	for line in file: 
 		if line.startswith(">"): #première ligne avec nom d'espèce
-			element = line.rstrip().split('[') #on récupère le nom de l'espèce /!\ faut enlever le ] en plus
+			element = line.replace('[', ';').replace(']', ';').split(';') #on récupère le nom de l'espèce
+			print(element[1])
 			specie.append(element[1]) #on stock dans une liste les noms des espèces
 		else:
 			while line[0]!=">": #pour les lignes de séquence
 				for l in line:
-					lp=l+str(position)# Associe à l'AA sa position dans la séquence
-					print(lp)
-					sequence += lp #Normalement doit faire une chaine de caractère avec AA + position
-					position+=1 #incrémente position de +1
-			sequences.append(lp)		
-			print(sequence)
-
-
+					print(line)
+					#lp=l+str(position)# Associe à l'AA sa position dans la séquence
+					#print(lp)
+					#sequence += lp #Normalement doit faire une chaine de caractère avec AA + position
+					#print(sequence)
+					#position+=1 #incrémente position de +1
+			#sequences.append(lp)
+			#position = 1	
+			#print(sequence)
+	print(specie)
