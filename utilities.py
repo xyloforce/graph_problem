@@ -98,3 +98,16 @@ def dict_keys_to_mzn_axis(neighbourhood_dict, axis_number):
     mzn_axis += keys[-1]
     mzn_axis += ";"
     return mzn_axis
+
+def sequence_length(filename):
+    sequence_file = open(filename)
+    int_set = set()
+    length = 0
+    for line in sequence_file:
+        if line[0] == ">":
+            if length > 0:
+                int_set.add(length)
+                length = 0
+        else:
+            length += len(line)
+    return min(int_set)
