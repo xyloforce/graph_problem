@@ -1,35 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import utilities
+import sys
+import subprocess
 
-#Faire Blast à partir d'une séquence de protéine d'une espèce de façon à trouver des séquences 
-#homologues de façon a récupérer d'autres séquences de cette protéines pour d'autres espèces. 
+species = utilities.blast_to_dict(sys.argv[1], 30, 40)
 
-##Initialization and file opening  
+result=open("Problem.dzn", "w")
+neighbourhood = utilities.create_neighborhoods(species)
 
-with open('raw','r') as file:
-	dico = {}
-	sequence = ""
-	for line in file: 
-		line = line.rstrip()
-		if line.startswith(">"): 
-			#On traite la première ligne du bloc de l'espèce 
-			element = line.replace('[', ';').replace(']', ';').split(';') #On récupère le nom de l'espèce
-			espece = element[1]
-			dico[espece] = "" #On la stock en clé de dico
-			position = 1
-			sequence = ""
-			lp = ""
+result.write(utilities.dict_keys_to_mzn_enum(neighbourhood) + "\n")
+result.write(utilities.dict_to_mzn_array(neighbourhood, "share_species") + "\n")
+result.write(utilities.dict_to_mzn_array(utilities.create_incompatibilities(species), "incompatibilities") + "\n")
+result.write(utilities.dict_keys_to_mzn_set(neighbourhood) + "\n")
+result.write(utilities.dict_keys_to_mzn_axis(neighbourhood, "1") + "\n")
+result.write(utilities.dict_keys_to_mzn_axis(neighbourhood, "2") + "\n")
 
-		else:
-			#On traite le bloc de séquence
-			for l in line:
-				lp=l+str(position)# Associe à l'AA sa position dans la séquence
-				sequence += lp 
-				position+=1 #incrémente position de +1
-			dico[espece] = sequence #Dico avec clé espèce et valeur associée
-	print(dico)
+result.close()
 
-	
-
-	
+command = ["minizinc", "--solver", "Gecode", "Problem.mzn", "Problem.dzn"]
+result = subprocess.run(command, capture_output=True, text=True)
+print(result.stdout)

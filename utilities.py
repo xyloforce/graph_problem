@@ -1,10 +1,45 @@
+import re
+
+def blast_to_dict(filename, start_window, end_window):
+    """
+    Faire Blast à partir d'une séquence de protéine d'une espèce de façon à trouver des séquences homologues de façon a récupérer d'autres séquences de cette protéines pour d'autres espèces. 
+    """
+    with open(filename, 'r') as file:
+        dico = {}
+        sequence = ""
+        for line in file: 
+            line = line.rstrip()
+            if line.startswith(">"): 
+                #On traite la première ligne du bloc de l'espèce
+                espece = re.findall("\[(.+)\]", line)[0] # regex for "select all chars between two brackets"
+                # element = line.replace('[', ';').replace(']', ';').split(';') #On récupère le nom de l'espèce
+                # espece = element[1]
+                dico[espece] = list()
+                position = 1
+                sequence = ""
+                lp = ""
+
+            else:
+                #On traite le bloc de séquence
+                for l in line:
+                    if position > end_window:
+                        break
+                    elif position < start_window:
+                        position+=1 #incrémente position de +1
+                    else:
+                        lp = l + str(position) # Associe à l'AA sa position dans la séquence
+                        dico[espece].append(lp)
+                        position+=1 #incrémente position de +1
+                # dico[espece] = sequence #Dico avec clé espèce et valeur associée
+        return dico
+
 def create_neighborhoods(species_dict):
     neighbourhood = dict() # each char and his neighbors
     for i in species_dict: # i is a species
         for j in species_dict[i]: # j is a state of i
             if j not in neighbourhood: # ensure proper initialization
                 neighbourhood[j]=set()
-            neighbourhood[j].update(species[i]) # add states from the same species to j' neighbors
+            neighbourhood[j].update(species_dict[i]) # add states from the same species to j' neighbors
     return neighbourhood
 
 def create_incompatibilities(species_dict):
@@ -63,20 +98,3 @@ def dict_keys_to_mzn_axis(neighbourhood_dict, axis_number):
     mzn_axis += keys[-1]
     mzn_axis += ";"
     return mzn_axis
-
-species = dict() # entry data
-species["S1"]="A1", "D2", "B3", "B4"
-species["S2"]="B1", "C2", "D3", "B4"
-species["S3"]="C1", "C2", "F3", "Z4"
-
-result=open("Problem.dzn", "w")
-neighbourhood = create_neighborhoods(species)
-
-result.write(dict_keys_to_mzn_enum(neighbourhood) + "\n")
-result.write(dict_to_mzn_array(neighbourhood, "share_species") + "\n")
-result.write(dict_to_mzn_array(create_incompatibilities(species), "incompatibilities") + "\n")
-result.write(dict_keys_to_mzn_set(neighbourhood) + "\n")
-result.write(dict_keys_to_mzn_axis(neighbourhood, "1") + "\n")
-result.write(dict_keys_to_mzn_axis(neighbourhood, "2") + "\n")
-
-result.close()
