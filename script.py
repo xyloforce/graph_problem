@@ -39,10 +39,10 @@ for filename in glob.glob("benchmarks/*.txt"): # for each protein
             start = time.time()
             result_process = subprocess.run(command, capture_output=True, text=True)
             end = time.time()
-            result = result + (end - start)
+            runtime = runtime + (end - start)
             print(result_process.stdout)
             
-        result = result / 20
+        runtime = runtime / 20
         window += 1 # increase size of the window
     window = 0
-    csv_writer.writerow({'Instance': filename.split("/")[-1], 'Window': str(window), 'mean runtime': str(result)})
+    csv_writer.writerow({'Instance': filename.split("/")[-1], 'Window': str(window), 'mean runtime': str(runtime)})
