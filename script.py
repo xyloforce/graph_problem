@@ -43,6 +43,6 @@ for filename in glob.glob("benchmarks/*.txt"): # for each protein
             print(result_process.stdout)
             
         runtime = runtime / 20
-        csv_writer.writerow({'instance': filename.split("/")[-1], 'Window': str(window), 'mean runtime': str(runtime)})
+        csv_writer.writerow({'instance': filename.split("/")[-1], 'window': str(window), 'mean runtime': str(runtime)})
         window += 1 # increase size of the window
     window = 0
