@@ -39,7 +39,7 @@ for filename in glob.glob("benchmarks/*.txt"): # for each protein
             start = time.time()
             result_process = subprocess.run(command, capture_output=True, text=True)
             end = time.time()
-            result += end - start
+            result = result + (end - start)
             print(result_process.stdout)
             
         result = result / 20
