@@ -11,7 +11,7 @@ window = int()
 
 # prepare output file
 csv_file = open("results.csv", "w")
-fieldnames = ["Instance", "Windows", "runtime"]
+fieldnames = ["instance", "window", "mean runtime"]
 csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 csv_writer.writeheader()
 
@@ -43,6 +43,6 @@ for filename in glob.glob("benchmarks/*.txt"): # for each protein
             print(result_process.stdout)
             
         runtime = runtime / 20
+        csv_writer.writerow({'instance': filename.split("/")[-1], 'Window': str(window), 'mean runtime': str(runtime)})
         window += 1 # increase size of the window
     window = 0
-    csv_writer.writerow({'Instance': filename.split("/")[-1], 'Window': str(window), 'mean runtime': str(runtime)})
