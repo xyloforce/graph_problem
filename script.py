@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#FIXME fix window gestion
 import utilities
 import sys
 import subprocess
@@ -10,35 +9,40 @@ import csv
 
 window = int()
 
+# prepare output file
 csv_file = open("results.csv", "w")
 fieldnames = ["Instance", "Windows", "runtime"]
 csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 csv_writer.writeheader()
 
-for filename in glob.glob("benchmarks/*.txt"):
-    max_length = utilities.sequence_length(filename)
-    while(window*10+10 < max_length):
-        species = utilities.blast_to_dict(filename, window*10, window*10+10)
-        result=open("Problem.dzn", "w")
-        neighbourhood = utilities.create_neighborhoods(species)
+for filename in glob.glob("benchmarks/*.txt"): # for each protein
+    max_length = utilities.sequence_length(filename) # get the length of the smaller protein
+    while(window*10+10 < max_length): # while the window is smaller than the smaller prot
+        result = 0
+        for i in range(100): # 100 repetitions
+            species = utilities.blast_to_dict(filename, window*10, window*10+10) # convert protein sequences in dict protein:states
+            result=open("Problem.dzn", "w") # the datafile for minizinc
+            neighbourhood = utilities.create_neighborhoods(species) # create dict state:neighbors
 
-        result.write(utilities.dict_keys_to_mzn_enum(neighbourhood) + "\n")
-        result.write(utilities.dict_to_mzn_array(neighbourhood, "share_species") + "\n")
-        result.write(utilities.dict_to_mzn_array(utilities.create_incompatibilities(species), "incompatibilities") + "\n")
-        result.write(utilities.dict_keys_to_mzn_set(neighbourhood) + "\n")
-        result.write(utilities.dict_keys_to_mzn_axis(neighbourhood, "1") + "\n")
-        result.write(utilities.dict_keys_to_mzn_axis(neighbourhood, "2") + "\n")
-        result.close()
+            result.write(utilities.dict_keys_to_mzn_enum(neighbourhood) + "\n") # write enum in the datafile
+            print(str(len(neighbourhood)))
+            result.write(utilities.dict_to_mzn_array(neighbourhood, "share_species") + "\n") # write array of neighbors
+            result.write(utilities.dict_to_mzn_array(utilities.create_incompatibilities(species), "incompatibilities") + "\n") # write array of incompatibilities
+            result.write(utilities.dict_keys_to_mzn_set(neighbourhood) + "\n") # write 1..(total number of nodes)
+            result.write(utilities.dict_keys_to_mzn_axis(neighbourhood, "1") + "\n") # write (first node)..(end node) 
+            result.write(utilities.dict_keys_to_mzn_axis(neighbourhood, "2") + "\n") # same but for the 2nd axis
+            result.close()
 
-        command = ["minizinc", "--solver", "Gecode", "Problem.mzn", "Problem.dzn"]
-        start = time.time()
-        try:
-            result = subprocess.run(command, capture_output=True, text=True, timeout=60)
+            command = ["minizinc", "--time-limit", "1800000", "--solver", "Gecode", "Problem.mzn", "Problem.dzn"] # launch minizinc with proper parameters
+            
+            # measuring runtime
+            start = time.time()
+            result_process = subprocess.run(command, capture_output=True, text=True)
             end = time.time()
-            result = end - start
-        except subprocess.TimeoutExpired:
-            print("Instance not solvable")
-            result = "None"
-        
-        csv_writer.writerow({'Instance': filename.split("/")[-1], 'Windows': str(window), 'runtime': str(result)})
-        window += 1
+            result += end - start
+            print(result_process.stdout)
+            
+        result = result / 20
+        window += 1 # increase size of the window
+    window = 0
+    csv_writer.writerow({'Instance': filename.split("/")[-1], 'Window': str(window), 'mean runtime': str(result)})

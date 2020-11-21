@@ -13,4 +13,5 @@ constraint alldifferent(ordering);
 /*#### Constraints ####*/
 constraint forall(i in number_States)(forall(j in number_States)(if j > i /\ share_species[ordering[i],ordering[j]]=true then forall(k in number_States)(if k > i/\ share_species[ordering[i], ordering[k]]=true then if share_species[ordering[j], ordering[k]]=true then true else if incompatibilities[ordering[k],ordering[j]]=false then true else false endif endif else true endif) else true endif));
 
-solve satisfy;
+solve::restart_linear(8)
+  satisfy;

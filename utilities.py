@@ -2,35 +2,30 @@ import re
 
 def blast_to_dict(filename, start_window, end_window):
     """
-    Faire Blast à partir d'une séquence de protéine d'une espèce de façon à trouver des séquences homologues de façon a récupérer d'autres séquences de cette protéines pour d'autres espèces. 
+    convert blast output to dict protein:state
     """
     with open(filename, 'r') as file:
         dico = {}
         sequence = ""
         for line in file: 
             line = line.rstrip()
-            if line.startswith(">"): 
-                #On traite la première ligne du bloc de l'espèce
-                espece = re.findall("\[(.+)\]", line)[0] # regex for "select all chars between two brackets"
-                # element = line.replace('[', ';').replace(']', ';').split(';') #On récupère le nom de l'espèce
-                # espece = element[1]
+            if line.startswith(">"): # it's a blast header
+                espece = re.findall("\[(.+)\]", line)[0] # regex for "select all chars between two brackets" -> select species name
                 dico[espece] = list()
                 position = 1
                 sequence = ""
                 lp = ""
 
-            else:
-                #On traite le bloc de séquence
+            else: # it's a protein line
                 for l in line:
-                    if position > end_window:
+                    if position > end_window: # position is after the window : stop scan
                         break
-                    elif position < start_window:
-                        position+=1 #incrémente position de +1
-                    else:
-                        lp = l + str(position) # Associe à l'AA sa position dans la séquence
-                        dico[espece].append(lp)
-                        position+=1 #incrémente position de +1
-                # dico[espece] = sequence #Dico avec clé espèce et valeur associée
+                    elif position < start_window: # position is before the window : go to next pos
+                        position += 1
+                    else: # position is in window
+                        lp = l + str(position) #  state is amino acid + pos of this amino acid in the sequence
+                        dico[espece].append(lp) # add state to list corresponding to this protein's species
+                        position +=1
         return dico
 
 def create_neighborhoods(species_dict):
