@@ -18,7 +18,7 @@ csv_writer.writeheader()
 for filename in glob.glob("benchmarks/*.txt"): # for each protein
     max_length = utilities.sequence_length(filename) # get the length of the smaller protein
     while(window*10+10 < max_length): # while the window is smaller than the smaller prot
-        result = 0
+        runtime = 0
         for i in range(100): # 100 repetitions
             species = utilities.blast_to_dict(filename, window*10, window*10+10) # convert protein sequences in dict protein:states
             result=open("Problem.dzn", "w") # the datafile for minizinc
